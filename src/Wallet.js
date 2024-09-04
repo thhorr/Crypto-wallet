@@ -1,108 +1,203 @@
-import React, { useState } from "react";
-import { ethers } from "ethers";
-import { Circles } from "react-loader-spinner";
-import { Tooltip as ReactTooltip } from "react-tooltip";
+import React, { useState } from 'react';
+import { ethers } from 'ethers';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Wallet = () => {
   const [wallet, setWallet] = useState(null);
   const [balance, setBalance] = useState(null);
-  const [recipient, setRecipient] = useState("");
-  const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [network, setNetwork] = useState("sepolia"); // Default to Sepolia testnet
+  const [isLoading, setIsLoading] = useState(false);
+  const [recipient, setRecipient] = useState('');
+  const [amount, setAmount] = useState('');
 
-  // Create a new wallet
   const createWallet = () => {
     const newWallet = ethers.Wallet.createRandom();
     setWallet(newWallet);
+    setBalance(null);
   };
 
-  // Fetch the wallet balance
   const getBalance = async () => {
-    if (wallet) {
-      setLoading(true);
-      try {
-        // Provider creation syntax has slightly changed
-        const provider = new ethers.JsonRpcProvider(`https://shape-sepolia.g.alchemy.com/v2/iYhqAD_7pxcsW26LIHssiJhKgbrfQdDT`);
-        const walletBalance = await provider.getBalance(wallet.address);
-        setBalance(ethers.formatEther(walletBalance)); // Format balance as ETH
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  // Send a transaction
-  const sendTransaction = async () => {
-    if (!ethers.isAddress(recipient) || isNaN(amount) || Number(amount) <= 0) {
-      alert("Invalid recipient address or amount");
+    if (!wallet) {
+      alert('Create a wallet first!');
       return;
     }
 
-    if (wallet) {
-      setSending(true);
-      try {
-        const provider = new ethers.JsonRpcProvider(`https://shape-sepolia.g.alchemy.com/v2/iYhqAD_7pxcsW26LIHssiJhKgbrfQdDT`);
-        const signer = wallet.connect(provider);
-        const tx = await signer.sendTransaction({
-          to: recipient,
-          value: ethers.parseEther(amount), // Parse the amount into wei
-        });
-        await tx.wait(); // Wait for transaction to be mined
-        alert("Transaction Successful");
-      } catch (error) {
-        alert(`Transaction Failed: ${error.message}`);
-      } finally {
-        setSending(false);
-      }
+    const provider = new ethers.JsonRpcProvider(`https://shape-sepolia.g.alchemy.com/v2/iYhqAD_7pxcsW26LIHssiJhKgbrfQdDT`);
+    const balance = await provider.getBalance(wallet.address);
+    setBalance(ethers.formatEther(balance));
+  };
+
+  const addEthToWallet = async () => {
+    if (!wallet) {
+      alert('Create a wallet first!');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const provider = new ethers.JsonRpcProvider(`https://shape-sepolia.g.alchemy.com/v2/iYhqAD_7pxcsW26LIHssiJhKgbrfQdDT`);
+      const senderPrivateKey = 'afa0c7df601156a575aaa1750fbd7cfcb0b45d9a3f2b96d583355054d0761a4b';
+      const senderWallet = new ethers.Wallet(senderPrivateKey, provider);
+
+      const tx = await senderWallet.sendTransaction({
+        to: wallet.address,
+        value: ethers.parseEther('0.01'),
+      });
+
+      await tx.wait();
+      getBalance();
+      alert('0.01 ETH added to the wallet');
+    } catch (error) {
+      alert(`Failed to add ETH: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const sendTransaction = async () => {
+    if (!wallet) {
+      alert('Create a wallet first!');
+      return;
+    }
+
+    if (!recipient || !amount) {
+      alert('Please enter both recipient address and amount.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const provider = new ethers.JsonRpcProvider(`https://shape-sepolia.g.alchemy.com/v2/iYhqAD_7pxcsW26LIHssiJhKgbrfQdDT`);
+      const signer = wallet.connect(provider);
+
+      const tx = await signer.sendTransaction({
+        to: recipient,
+        value: ethers.parseEther(amount),
+      });
+
+      await tx.wait();
+      getBalance();
+      alert(`Sent ${amount} ETH to ${recipient}`);
+    } catch (error) {
+      alert(`Failed to send transaction: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      <select onChange={(e) => setNetwork(e.target.value)} value={network}>
-        <option value="mainnet">Mainnet</option>
-        <option value="zksync">Zksync</option>
-        <option value="optimism">Optimism</option>
-        <option value="sepolia">Sepolia</option>
-        <option value="polygon">Polygon</option>
-      </select>
-      <button data-tip="Generate a new Ethereum wallet" onClick={createWallet}>
-        Create Wallet
-      </button>
-      <ReactTooltip place="top" type="dark" effect="float" />
-      {wallet && (
-        <div>
-          <p>Address: {wallet.address}</p>
-          <button data-tip="Fetch the wallet balance" onClick={getBalance}>
-            Get Balance
-          </button>
-          {loading ? (
-            <Circles height="80" width="80" color="#61dafb" />
-          ) : (
-            balance && <p>Balance: {balance} ETH</p>
-          )}
-          <input
-            type="text"
-            placeholder="Recipient Address"
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-            data-tip="Enter the recipient's Ethereum address"
-          />
-          <input
-            type="text"
-            placeholder="Amount in ETH"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            data-tip="Enter the amount of ETH to send"
-          />
-          <button data-tip="Send ETH to the recipient" onClick={sendTransaction} disabled={sending}>
-            {sending ? "Sending..." : "Send Transaction"}
-          </button>
+    <>
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div className="container-fluid">
+          <a className="navbar-brand" href="#">
+            Crypto Wallet
+          </a>
         </div>
-      )}
-    </div>
+      </nav>
+
+      <div className="container mt-5">
+        <h1 className="text-center mb-4">Manage Your Crypto Wallet</h1>
+
+        <div className="card">
+          <div className="card-body">
+            <h5 className="card-title">Wallet Details</h5>
+
+            <div className="mb-3">
+              <button className="btn btn-primary" onClick={createWallet}>
+                Create Wallet
+              </button>
+            </div>
+
+            {wallet && (
+              <>
+                <div className="mb-3">
+                  <label htmlFor="walletAddress" className="form-label">
+                    Wallet Address
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="walletAddress"
+                    value={wallet.address}
+                    readOnly
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="walletBalance" className="form-label">
+                    Wallet Balance (ETH)
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="walletBalance"
+                    value={balance || 'N/A'}
+                    readOnly
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <button className="btn btn-success" onClick={getBalance}>
+                    Get Balance
+                  </button>
+                  <button
+                    className="btn btn-warning ms-2"
+                    onClick={addEthToWallet}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Sending...' : 'Add ETH'}
+                  </button>
+                </div>
+
+                <hr />
+
+                <div className="mb-3">
+                  <h5>Send ETH</h5>
+                  <div className="mb-3">
+                    <label htmlFor="recipient" className="form-label">
+                      Recipient Address
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="recipient"
+                      value={recipient}
+                      onChange={(e) => setRecipient(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="amount" className="form-label">
+                      Amount (ETH)
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="amount"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                    />
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    onClick={sendTransaction}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Sending...' : 'Send ETH'}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {!wallet && (
+              <div className="alert alert-info">
+                Please create a wallet to see details and perform actions.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
