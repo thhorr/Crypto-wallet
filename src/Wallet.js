@@ -96,14 +96,12 @@ const Wallet = () => {
         </div>
       </nav>
 
-      <div className="container mt-5">
-        <h1 className="text-center mb-4">Manage Your Crypto Wallet</h1>
-
-        <div className="card">
+      <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+        <div className="card w-50">
           <div className="card-body">
-            <h5 className="card-title">Wallet Details</h5>
+            <h5 className="card-title text-center">Wallet Details</h5>
 
-            <div className="mb-3">
+            <div className="d-flex justify-content-center mb-3">
               <button className="btn btn-primary" onClick={createWallet}>
                 Create Wallet
               </button>
@@ -117,7 +115,7 @@ const Wallet = () => {
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control text-center"
                     id="walletAddress"
                     value={wallet.address}
                     readOnly
@@ -130,14 +128,14 @@ const Wallet = () => {
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control text-center"
                     id="walletBalance"
                     value={balance || 'N/A'}
                     readOnly
                   />
                 </div>
 
-                <div className="mb-3">
+                <div className="d-flex justify-content-center mb-3">
                   <button className="btn btn-success" onClick={getBalance}>
                     Get Balance
                   </button>
@@ -153,14 +151,14 @@ const Wallet = () => {
                 <hr />
 
                 <div className="mb-3">
-                  <h5>Send ETH</h5>
+                  <h5 className="text-center">Send ETH</h5>
                   <div className="mb-3">
                     <label htmlFor="recipient" className="form-label">
                       Recipient Address
                     </label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-control text-center"
                       id="recipient"
                       value={recipient}
                       onChange={(e) => setRecipient(e.target.value)}
@@ -172,25 +170,27 @@ const Wallet = () => {
                     </label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-control text-center"
                       id="amount"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                     />
                   </div>
-                  <button
-                    className="btn btn-primary"
-                    onClick={sendTransaction}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Sending...' : 'Send ETH'}
-                  </button>
+                  <div className="d-flex justify-content-center">
+                    <button
+                      className="btn btn-primary"
+                      onClick={sendTransaction}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Sending...' : 'Send ETH'}
+                    </button>
+                  </div>
                 </div>
               </>
             )}
 
             {!wallet && (
-              <div className="alert alert-info">
+              <div className="alert alert-info text-center">
                 Please create a wallet to see details and perform actions.
               </div>
             )}
