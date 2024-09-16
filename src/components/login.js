@@ -1,10 +1,12 @@
 import { ethers } from 'ethers';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Button, TextField, Typography } from '@mui/material';
 
 const Login = ({ setLoggedIn }) => {
   const [password, setPassword] = useState('');
   const [wallet, setWallet] = useState(null);
+  const navigate = useNavigate();
 
   const unlockWallet = async () => {
     const encryptedWallet = localStorage.getItem('encryptedWallet');
@@ -19,6 +21,7 @@ const Login = ({ setLoggedIn }) => {
       );
       setWallet(decryptedWallet);
       setLoggedIn(true);
+      navigate('/home');
     } catch (error) {
       alert('Incorrect password');
     }

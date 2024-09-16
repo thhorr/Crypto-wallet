@@ -1,19 +1,20 @@
 import { ethers } from 'ethers';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Button, TextField, Typography } from '@mui/material';
 
 const ImportWallet = () => {
   const [seedPhrase, setSeedPhrase] = useState('');
   const [password, setPassword] = useState('');
-  const [wallet, setWallet] = useState(null);
+  const navigate = useNavigate();
 
   const importWallet = async () => {
     try {
-      // Using fromPhrase instead of fromMnemonic
       const wallet = ethers.Wallet.fromPhrase(seedPhrase);
       const encryptedJson = await wallet.encrypt(password);
-      setWallet(wallet);
       localStorage.setItem('encryptedWallet', encryptedJson);
+
+      navigate('/login');
     } catch (error) {
       alert('Invalid Seed Phrase');
     }
@@ -21,6 +22,7 @@ const ImportWallet = () => {
 
   return (
     <Box sx={{ padding: 4 }}>
+      <Typography variant="h5">Import Wallet</Typography>
       <TextField
         label="Enter Seed Phrase"
         fullWidth
@@ -39,11 +41,6 @@ const ImportWallet = () => {
       <Button variant="contained" color="primary" onClick={importWallet}>
         Import Wallet
       </Button>
-      {wallet && (
-        <Typography variant="body1" mt={2}>
-          Wallet Address: {wallet.address}
-        </Typography>
-      )}
     </Box>
   );
 };

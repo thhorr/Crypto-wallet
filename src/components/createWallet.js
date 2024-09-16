@@ -1,11 +1,12 @@
 import { ethers } from 'ethers';
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom'; 
 import { Box, Button, Typography, TextField } from '@mui/material';
 
 const CreateWallet = () => {
   const [seedPhrase, setSeedPhrase] = useState('');
   const [password, setPassword] = useState('');
-  const [encryptedWallet, setEncryptedWallet] = useState('');
+  const navigate = useNavigate();
 
   const generateWallet = async () => {
     const wallet = ethers.Wallet.createRandom();
@@ -13,11 +14,11 @@ const CreateWallet = () => {
   };
 
   const encryptWallet = async () => {
-    // Using fromPhrase instead of fromMnemonic
-    const wallet = ethers.Wallet.fromPhrase(seedPhrase);  
+    const wallet = ethers.Wallet.fromPhrase(seedPhrase);
     const encryptedJson = await wallet.encrypt(password);
-    setEncryptedWallet(encryptedJson);
     localStorage.setItem('encryptedWallet', encryptedJson);
+    
+    navigate('/login');
   };
 
   return (
@@ -44,6 +45,11 @@ const CreateWallet = () => {
           </Button>
         </Box>
       )}
+      <Box mt={2}>
+        <Typography variant="body2">
+          Already have a wallet? <Link to="/import-wallet">Import Wallet</Link>
+        </Typography>
+      </Box>
     </Box>
   );
 };

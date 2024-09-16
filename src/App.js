@@ -1,34 +1,41 @@
 import React, { useState } from 'react';
-import { Box, AppBar, Toolbar, Typography } from '@mui/material';
-import CreateWallet from './components/createWallet';
-import Login from './components/login';
-import ImportWallet from './components/importWallet';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Box } from '@mui/material';
+import CreateWallet from './components/CreateWallet';
+import ImportWallet from './components/ImportWallet';
+import Login from './components/Login';
+import Home from './components/Home';
 
 function App() {
-  const [hasWallet, setHasWallet] = useState(
-    !!localStorage.getItem('encryptedWallet')
-  );
   const [loggedIn, setLoggedIn] = useState(false);
 
   return (
-    <Box>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6">MetaMask Clone</Typography>
-        </Toolbar>
-      </AppBar>
-      <Box sx={{ padding: 4 }}>
-        {loggedIn ? (
-          <Typography variant="h4">Welcome to your wallet!</Typography>
-        ) : (
-          <>
-            {!hasWallet && <CreateWallet />}
-            {hasWallet && <Login setLoggedIn={setLoggedIn} />}
-            <ImportWallet />
-          </>
-        )}
+    <Router>
+      <Box>
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="h6">Zephyr</Typography>
+          </Toolbar>
+        </AppBar>
+        <Box sx={{ padding: 4 }}>
+          <Routes>
+            {!loggedIn ? (
+              <>
+                <Route path="/create-wallet" element={<CreateWallet />} />
+                <Route path="/import-wallet" element={<ImportWallet />} />
+                <Route path="/login" element={<Login setLoggedIn={setLoggedIn} />} />
+                <Route path="*" element={<Navigate to="/create-wallet" />} />
+              </>
+            ) : (
+              <>
+                <Route path="/home" element={<Home />} />
+                <Route path="*" element={<Navigate to="/home" />} />
+              </>
+            )}
+          </Routes>
+        </Box>
       </Box>
-    </Box>
+    </Router>
   );
 }
 
